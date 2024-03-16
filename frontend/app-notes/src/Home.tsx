@@ -13,7 +13,7 @@ import { ModalContext } from "./context/ModalContext";
 const Home = () => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [filteredNotes, setFilteredNotes] = useState<Note[]>([]);
-  const [searchTerm, setSerarchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const {
     noteToEdit,
@@ -23,19 +23,22 @@ const Home = () => {
   } = useContext(ModalContext);
   
   async function getNotes() {
-    const notes = await getApiNotes();
-    setNotes(notes);
+    try {
+      const notes = await getApiNotes();
+      setNotes(notes);
+    } catch (error) {
+      console.error("Error fetching notes:", error);
+      // Handle the error, e.g., show a user-friendly message
+    }
   }
 
   function getFilteredNotes() {
-    const filteredNotes = notes.filter((note) => {
+    return notes.filter((note) => {
       return (
         note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         note.description.toLowerCase().includes(searchTerm.toLowerCase())
       );
     });
-
-    return filteredNotes;
   }
 
   useEffect(() => {
@@ -47,7 +50,7 @@ const Home = () => {
       const filteredNotes = getFilteredNotes();
       setFilteredNotes(filteredNotes);
     }
-  }, [searchTerm]);
+  }, [searchTerm, notes]);
 
   async function handleOnCreate() {
     closeCreateNoteModal();
@@ -78,7 +81,7 @@ const Home = () => {
         <ApplicationTitle />
       </div>
       <div>
-        <SearchInput onSearch={(value: string) => setSerarchTerm(value)} />
+        <SearchInput onSearch={(value: string) => setSearchTerm(value)} />
       </div>
       <Header />
       <CardNoteGrid>
